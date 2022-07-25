@@ -25,7 +25,6 @@ class LinearLayer(NNLayer):
 
     def forward(self, x_input):
         self.last_input = np.column_stack((x_input, np.ones(x_input.shape[0])))
-        #print("layer input:", self.last_input.shape)
         return np.dot(self.last_input, self.weights)
     
     def backward(self, top_gradient):
@@ -34,7 +33,6 @@ class LinearLayer(NNLayer):
 
     def apply_update(self, learning_rate, momentum=0.0):
         self.weights = self.weights - learning_rate * self.de_dw
-        #print(np.sum(self.weights))
 
 class Perceptron:
     def __init__(self, n_input, n_output, activation_function=None):
@@ -114,14 +112,12 @@ class MultilayerPerceptron:
 
     def forward(self, x_input):
         x = x_input
-        #print("mlp input:", x.shape)
         for layer in  self.linear_layers:
             x = layer.forward(x)
         return x
 
     def backward(self, top_gradient):
         x = top_gradient 
-        #print("top_gradient =", x.shape)
         for layer in reversed(self.linear_layers):
             x = layer.backward(x)
         return x
@@ -134,3 +130,15 @@ class MultilayerPerceptron:
     def classify(self, test_samples):
         result = self.forward(test_samples)
         return np.array(np.argmax(result, 1))
+
+class ReLULayer(NNLayer):
+   
+    def __init__(self):
+        self.current_input: np.ndarray
+
+    def forward(self, x_input):
+        self.current_input = x_input
+        return np.maximum(0, x_input)
+
+    def backward(self, top_gradient):
+        return top_gradient * (self.current_input > 0)
